@@ -54,11 +54,11 @@ def addToList(songObject):
 	return;
 	
 #Extract Metadata from file
-#Purpose: takes in a name of a song, uses that appended to the path saved in "path". 
-#From new path, locate MP3 file and extract the ID3 metadata tags to find the Title, Album, and Artist
+#Purpose: song object, uses filename from that object to select song from directory 
+#From directory, locate MP3 file and extract the ID3 metadata tags to find the Title, Album, and Artist
 #Use SongObjectName.addMetadata(artist, album, track) to add to "musicList"
 #returns nothing.
-def getID3(filename):
+def getID3(SongObject):
 
 	return;
 
@@ -132,6 +132,15 @@ def checkTempo(index):
 def generatePlaylist(keyword):
 
 	return;
+	
+#-------------------------------------------------------------------------------------
+initList();
+getMp3s(PathFromUIElement);
+for SongObjects in musicList:
+	getID3(SongObjects);
+for SongObjects in musicList:
+	getAudioFeatures(getSpotifyID(SongObjects.getMetadata()))
+
 	
 #-------------------------------------------------------------------------------------
 #Purpose: Use OS to prompt for path to music folder
