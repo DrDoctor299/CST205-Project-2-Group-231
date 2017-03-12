@@ -3,15 +3,15 @@
 
 class Song(object):
 
-	def __init__(fileName):
+	def __init__(self, fileName):
 		self.fileName = fileName
 	
-	def addMetadata(artist, album, track):
+	def addMetadata(self, artist, album, track):
 		self.artist = artist
 		self.album = album
 		self.track = track
 	
-	def addFeatures(dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo):
+	def addFeatures(self, dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo):
 		self.dance = dance
 		self.energy = energy
 		self.loudness = loudness
@@ -21,7 +21,7 @@ class Song(object):
 		self.liveness = liveness
 		self.tempo = tempo
 		
-	def getMetadata():
+	def getMetadata(self):
 		return self.artist, self.album, self.track;
 		
 	
