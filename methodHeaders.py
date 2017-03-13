@@ -1,56 +1,35 @@
-#Song Object
-#Purpose: Define an object which will hold all of the necessary data for each music file
+#Imports Song objects for use in methods below
+import SongClass.py
+import os
+import mutagen
+import re
 
-class Song(object):
-
-	def __init__(self, fileName):
-		self.fileName = fileName
-	
-	def addMetadata(self, artist, album, track):
-		self.artist = artist
-		self.album = album
-		self.track = track
-	
-	def addFeatures(self, dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo):
-		self.dance = dance
-		self.energy = energy
-		self.loudness = loudness
-		self.speech = speech
-		self.acoustic = acoustic
-		self.instrumental = instrumental
-		self.liveness = liveness
-		self.tempo = tempo
-		
-	def getMetadata(self):
-		return self.artist, self.album, self.track;
-		
-	
-
-	
-
-#Create two lists
+#Create two lists (CURRENTLY UNUSED)
 #Purpose: Initialize the list named "musicList" which will contain the Song objects, 
 #and the list named "selectedMusicList", which will contain only the Song objects selected as having a desired audio feature
 #retuns nothing
-def initList():
-
-	return;
+#def initList():
+#	musicList = []
+#	selectedMusicList = []
+#	return;
 
 #Load Music from folder
 #Purpose: takes in a path to a folder, finds the names of all mp3 files within that folder
 #Creates music objects as Song(fileName) for each, calls the addToList() function to add those objects to "musicList"
 #Returns nothing
 def getMp3s(path):
-	#for(all files in the folder):
-		#tempSong = Song(fileName)
-		#addToList(tempSong)
+	for fileName in os.listdir(path):
+	    if fileName.endswith(".mp3")
+			tempSong = Song(fileName)
+			addToList(musicList, tempSong)
+			del tempSong
 	return;
 	
 #Add songs to "musicList"
-#Purpose: takes in a Song object, and appends it to the list "musicList"
+#Purpose: takes in a Song object and musicList, and appends the Song to the list
 #Returns nothing
-def addToList(songObject):
-
+def addToList(musicList, songObject):
+	musicList.append(songObject)
 	return;
 	
 #Extract Metadata from file
@@ -58,8 +37,26 @@ def addToList(songObject):
 #From directory, locate MP3 file and extract the ID3 metadata tags to find the Title, Album, and Artist
 #Use SongObjectName.addMetadata(artist, album, track) to add to "musicList"
 #returns nothing.
-def getID3(SongObject):
-
+def getID3(path, SongObject):
+	
+	#Accesses current Song
+	audio = MP3(path + SongObject.fileName, ID3=EasyID3)
+	#Accesses tags for said Song, then splits all tags up into a list
+	ID3 = audio.pprint()
+	ID3List = tags.splitlines()
+	
+	#Creates re (regular expression) objects to compare strings in the provided tags (We will find artist, track and album if they exist)
+	artist = re.compile("^u'artist=")
+	album = re.compile("^u'album=")
+	track = re.compile("^u'title=")
+	#Compares all tags for the song against the previously created artist, album and track regular expression objects. On success, these are added to the appropriate Song object's attribute
+	for tags in ID3List
+		if re.match(artist, tags, flags=0)
+			SongObject.artist = tags.split('=')[1]
+		else if re.match(album, tags, flags=0)
+			SongObject.album = tags.split('=')[1]
+		else if re.match(track, tags, flags=0)
+			SongObject.track = tags.split('=')[1]
 	return;
 
 #Use metadata to find spotify id
@@ -134,12 +131,7 @@ def generatePlaylist(keyword):
 	return;
 	
 #-------------------------------------------------------------------------------------
-initList();
-getMp3s(PathFromUIElement);
-for SongObjects in musicList:
-	getID3(SongObjects);
-for SongObjects in musicList:
-	getAudioFeatures(getSpotifyID(SongObjects.getMetadata()))
+
 
 	
 #-------------------------------------------------------------------------------------
