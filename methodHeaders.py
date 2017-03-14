@@ -127,6 +127,28 @@ def checkTempo(index):
 #For each check that returns true, add that Song object to a new list "selectedMusicList"
 #return nothing
 def generatePlaylist(keyword):
+	for song in musicList:
+		if keyword is 'dance':
+			checkDance(song)
+		else if keyword is 'energy':
+			checkEnergy(song)
+		else if keyword is 'loudness':
+			checkLoudness(song)
+			
+		else if keyword is 'speech':
+			checkSpeech(song)
+		
+		else if keyword is 'acoustic':
+			checkAcoustic(song)
+		
+		else if keyword is 'instrumental':
+			checkInstrumental(song)
+			
+		else if keyword is 'liveness':
+			checkLiveness(song)
+			
+		else if keyword is 'tempo':
+			checkTempo(song)
 
 	return;
 	
