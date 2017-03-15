@@ -80,44 +80,104 @@ def getAudioFeatures(spotifyID):
 #Check single object in "musicList" for specific AudioFeature (uses the appropriate method for that category)
 #Returns boolean; true if high in that value, false if not
 
+#Constant value to compare the 
+global volume = 0.75
+
 #Permutations for each catagory:
 #dance
 def checkDance(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
+	
 
 	return check;
 
 #energy
 def checkEnergy(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 
 	return check;
 	
 #loudness
 def checkLoudness(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 
 	return check;
 
 #speech
 def checkSpeech(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 
 	return check;
 
 #acoustic
 def checkAcoustic(index):
+	if(index < volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 
 	return check;
 	
 #instrumental
 def checkInstrumental(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 
 	return check;
 	
 #liveness
 def checkLiveness(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 
 	return check;
 	
 #tempo
 def checkTempo(index):
+	if(index > volume):
+		
+		#index is greater than volume
+		#check is set to true
+		check = true;
+	else:
+		check = false;
 	
 	return check;
 
