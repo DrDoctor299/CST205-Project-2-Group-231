@@ -1,8 +1,18 @@
-#Imports Song objects for use in methods below
+#Imports Song Class for use in methods below
 import SongClass.py
+#Importing libraries used in various functions
 import os
 import mutagen
 import re
+
+#Imports python library built to interface with Spotify API
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+#Spotipy API: http://spotipy.readthedocs.io/en/latest/
+#Spotify API for;
+	#Audio Features: https://developer.spotify.com/web-api/get-audio-features/
+	#Search: https://developer.spotify.com/web-api/search-item/
+	#Client Credentials: https://developer.spotify.com/web-api/authorization-guide/#client-credentials-flow
 
 #Create two lists (CURRENTLY UNUSED)
 #Purpose: Initialize the list named "musicList" which will contain the Song objects, 
@@ -19,7 +29,7 @@ import re
 #Returns nothing
 def getMp3s(path):
 	for fileName in os.listdir(path):
-	    if fileName.endswith(".mp3")
+	    if fileName.endswith(".mp3"):
 			tempSong = Song(fileName)
 			addToList(musicList, tempSong)
 			del tempSong
@@ -50,12 +60,12 @@ def getID3(path, SongObject):
 	album = re.compile("^u'album=")
 	track = re.compile("^u'title=")
 	#Compares all tags for the song against the previously created artist, album and track regular expression objects. On success, these are added to the appropriate Song object's attribute
-	for tags in ID3List
-		if re.match(artist, tags, flags=0)
+	for tags in ID3List:
+		if re.match(artist, tags, flags=0):
 			SongObject.artist = tags.split('=')[1]
-		else if re.match(album, tags, flags=0)
+		else if re.match(album, tags, flags=0):
 			SongObject.album = tags.split('=')[1]
-		else if re.match(track, tags, flags=0)
+		else if re.match(track, tags, flags=0):
 			SongObject.track = tags.split('=')[1]
 	return;
 
@@ -64,16 +74,63 @@ def getID3(path, SongObject):
 #Look up track id using search (use all three arguments as keyword inputs)
 #return spotify trackID
 def getSpotifyID(artist, album, track):
-
+	
+	#Store three individual search terms in a variable (each seperated by a space)
+	searchTerm = artist + " " + album + " " + track
+	
+	#Create Spotipy object
+	sp = spotipy.Spotify()
+	
+	#Use spotify object to access the 'search' endpoint of the spotify web API
+	#Search using the terms passed in as arguments
+	#The three options other than searchTerm mean that the search will return the first Track object (and nothing else)
+	#API Link: https://developer.spotify.com/web-api/search-item/
+	result = sp.search(searchTerm, limit = 1, offset = 0, type = "track")
+	
+	#Parse the returned JSON object, accessing the URI
+	uri = result['tracks']['items'][0]['uri']
+	
+	#Split up the URI into its component parts, and save the 3rd part (the spotifyID) into variable spotifyID
+	uriList = uri.split(":")
+	spotifyID = uriList[2]
+	
 	return spotifyID;
-
+	
 #Use spotifyID to find audio features of each song
 #Purpose: Take in "spotifyID" (from findSpotifyID()) and filename
 #Use the "audio_features" method in the spotify api to get a list of category scores
 #add the category scores to the appropritate Song object using .addAudioFeatures()
 #return nothing
-def getAudioFeatures(spotifyID):
-
+def getAudioFeatures(index, spotifyID):
+	
+	#Generate a authorization token for the application to use
+	token = SpotifyClientCredentials('8f4c4bd785ff459f9d3ac53afff5c054', 'c5a47df5d779437b8a14ec418cc6b779')
+	#Create a spotipy object using the credentials we generated
+	sp = spotipy.Spotify(client_credentials_manager = token)
+	
+	#Uses the 'audio features' endpoint of the Spotify API
+	#API Doc Link: https://developer.spotify.com/web-api/get-audio-features/
+	features = sp.audio_features(spotifyID)
+	
+	#dance
+	dance = features[0]['danceability']
+	#energy
+	energy = features[0]['energy']
+	#loudness
+	loudness = features[0]['loudness']
+	#speech
+	speech = features[0]['speechiness']
+	#acoustic
+	acoustic = features[0]['acousticness']
+	#instrumental
+	instrumental = features[0]['instrumentalness']
+	#liveness
+	liveness = features[0]['liveness']
+	#tempo
+	tempo = features[0]['tempo']
+	
+	musicList[index].addFeatures(dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo)
+	
 	return;
 
 #Take in index of "musicList"
