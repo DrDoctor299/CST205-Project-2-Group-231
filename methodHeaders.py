@@ -1,8 +1,40 @@
 #Imports Song Class for use in methods below
-import SongClass
+#import SongClass
+class Song(object):
+
+	def __init__(self, fileName):
+		self.fileName = fileName
+		self.artist = ""
+		self.album = ""
+		self.track = ""
+	
+	def addArtist(self, artist):
+		self.artist = artist
+		
+	def addAlbum(self, album):
+		self.album = album
+		
+	def addTrack(self, track):
+		self.track = track
+	
+	def addFeatures(self, dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo):
+		self.dance = dance
+		self.energy = energy
+		self.loudness = loudness
+		self.speech = speech
+		self.acoustic = acoustic
+		self.instrumental = instrumental
+		self.liveness = liveness
+		self.tempo = tempo
+		
+	def getMetadata(self):
+		return self.artist, self.album, self.track;
+
 #Importing libraries used in various functions
 import os
 import mutagen
+from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import MP3
 import re
 
 #Imports python library built to interface with Spotify API
@@ -14,13 +46,15 @@ from spotipy.oauth2 import SpotifyClientCredentials
 	#Search: https://developer.spotify.com/web-api/search-item/
 	#Client Credentials: https://developer.spotify.com/web-api/authorization-guide/#client-credentials-flow
 
+
+musicList = []
+selectedMusicList = []
 #Create two lists (CURRENTLY UNUSED)
 #Purpose: Initialize the list named "musicList" which will contain the Song objects, 
 #and the list named "selectedMusicList", which will contain only the Song objects selected as having a desired audio feature
 #retuns nothing
 def initList():
-	musicList = []
-	selectedMusicList = []
+	
 	return;
 
 #Load Music from folder
@@ -31,7 +65,7 @@ def getMp3s(path):
 	for fileName in os.listdir(path):
 	    if fileName.endswith(".mp3"):
 			tempSong = Song(fileName)
-			addToList(musicList, tempSong)
+			addToList(tempSong)
 			del tempSong
 	return;
 	
@@ -57,20 +91,19 @@ def getID3(path, SongObject):
 	audio = MP3(path + SongObject.fileName, ID3=EasyID3)
 	#Accesses tags for said Song, then splits all tags up into a list
 	ID3 = audio.pprint()
-	ID3List = tags.splitlines()
+	ID3List = ID3.splitlines()
 	
-	#Creates re (regular expression) objects to compare strings in the provided tags (We will find artist, track and album if they exist)
-	artist = re.compile("^u'artist=")
-	album = re.compile("^u'album=")
-	track = re.compile("^u'title=")
 	#Compares all tags for the song against the previously created artist, album and track regular expression objects. On success, these are added to the appropriate Song object's attribute
 	for tags in ID3List:
-		if re.match(artist, tags, flags=0):
-			SongObject.artist = tags.split('=')[1]
-		elif re.match(album, tags, flags=0):
-			SongObject.album = tags.split('=')[1]
-		elif re.match(track, tags, flags=0):
-			SongObject.track = tags.split('=')[1]
+		if re.match("artist=.*", tags, flags=0):
+			artistRough = tags.split('=')
+			SongObject.artist = artistRough[1]
+		elif re.match("album=.*", tags, flags=0):
+			albumRough = tags.split('=')
+			SongObject.album = albumRough[1]
+		elif re.match("title=.*", tags, flags=0):
+			trackRough = tags.split('=')
+			SongObject.track = trackRough[1]
 	return;
 
 #Use metadata to find spotify id
@@ -80,7 +113,7 @@ def getID3(path, SongObject):
 def getSpotifyID(artist, album, track):
 	
 	#Store three individual search terms in a variable (each seperated by a space)
-	searchTerm = artist + " " + album + " " + track
+	searchTerm = artist + " " + track
 	
 	#Create Spotipy object
 	sp = spotipy.Spotify()
@@ -92,20 +125,26 @@ def getSpotifyID(artist, album, track):
 	result = sp.search(searchTerm, limit = 1, offset = 0, type = "track")
 	
 	#Parse the returned JSON object, accessing the URI
-	uri = result['tracks']['items'][0]['uri']
+	try:
+		uri = result['tracks']['items'][0]['uri']
 	
-	#Split up the URI into its component parts, and save the 3rd part (the spotifyID) into variable spotifyID
-	uriList = uri.split(":")
-	spotifyID = uriList[2]
+		#Split up the URI into its component parts, and save the 3rd part (the spotifyID) into variable spotifyID
+		uriList = uri.split(":")
+		spotifyID = uriList[2]
+		return spotifyID;
+	except IndexError:
+		print "Could not find song on Spotify"
+		return -1;
 	
-	return spotifyID;
 	
 #Use spotifyID to find audio features of each song
 #Purpose: Take in "spotifyID" (from findSpotifyID()) and filename
 #Use the "audio_features" method in the spotify api to get a list of category scores
 #add the category scores to the appropritate Song object using .addAudioFeatures()
 #return nothing
-def getAudioFeatures(index, spotifyID):
+def getAudioFeatures(SongObject, spotifyID):
+	if spotifyID == -1:
+		return;
 	
 	#Generate a authorization token for the application to use
 	token = SpotifyClientCredentials('8f4c4bd785ff459f9d3ac53afff5c054', 'c5a47df5d779437b8a14ec418cc6b779')
@@ -114,7 +153,7 @@ def getAudioFeatures(index, spotifyID):
 	
 	#Uses the 'audio features' endpoint of the Spotify API
 	#API Doc Link: https://developer.spotify.com/web-api/get-audio-features/
-	features = sp.audio_features(spotifyID)
+	features = sp.audio_features(str(spotifyID))
 	
 	#dance
 	dance = features[0]['danceability']
@@ -133,112 +172,105 @@ def getAudioFeatures(index, spotifyID):
 	#tempo
 	tempo = features[0]['tempo']
 	
-	musicList[index].addFeatures(dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo)
+	SongObject.addFeatures(dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo)
 	
 	return;
 
-#Take in index of "musicList"
-#Check single object in "musicList" for specific AudioFeature (uses the appropriate method for that category)
-#Returns boolean; true if high in that value, false if not
-
-#Constant value to compare the 
-global volume = 0.75
 
 #Permutations for each catagory:
 #dance
 def checkDance(index):
-	if(index > volume):
+	if(musicList[index].dance > .75):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
+		check = False;
 	
-
 	return check;
 
 #energy
 def checkEnergy(index):
-	if(index > volume):
+	if(musicList[index].energy > .75):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
-
+		check = False;
+	
 	return check;
 	
 #loudness
 def checkLoudness(index):
-	if(index > volume):
+	if(musicList[index].loudness > 30):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
-
+		check = False;
+	
 	return check;
 
 #speech
 def checkSpeech(index):
-	if(index > volume):
+	if(musicList[index].speech > .33 and musicList[index].speech < .66):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
-
+		check = False;
+	
 	return check;
 
 #acoustic
 def checkAcoustic(index):
-	if(index < volume):
+	if(musicList[index].acoustic > .75):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
-
+		check = False;
+	
 	return check;
 	
 #instrumental
 def checkInstrumental(index):
-	if(index > volume):
+	if(musicList[index].instrumental > .5):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
-
+		check = False;
+	
 	return check;
 	
 #liveness
 def checkLiveness(index):
-	if(index > volume):
+	if(musicList[index].liveness > .8):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
-
+		check = False;
+	
 	return check;
 	
 #tempo
 def checkTempo(index):
-	if(index > volume):
+	if(musicList[index].tempo > 120):
 		
 		#index is greater than volume
 		#check is set to true
-		check = true;
+		check = True;
 	else:
-		check = false;
+		check = False;
 	
 	return check;
 
@@ -250,26 +282,34 @@ def checkTempo(index):
 def generatePlaylist(keyword):
 	for song in musicList:
 		if keyword is 'dance':
-			checkDance(song)
-		else if keyword is 'energy':
-			checkEnergy(song)
-		else if keyword is 'loudness':
-			checkLoudness(song)
+			if checkDance(song):
+				addtoList(song)
+		elif keyword is 'energy':
+			if checkEnergy(song):
+				addtoList(song)
+		elif keyword is 'loudness':
+			if checkLoudness(song):
+				addtoList(song)
 			
-		else if keyword is 'speech':
-			checkSpeech(song)
+		elif keyword is 'speech':
+			if checkSpeech(song):
+				addtoList(song)
 		
-		else if keyword is 'acoustic':
-			checkAcoustic(song)
+		elif keyword is 'acoustic':
+			if checkAcoustic(song):
+				addtoList(song)
 		
-		else if keyword is 'instrumental':
-			checkInstrumental(song)
+		elif keyword is 'instrumental':
+			if checkInstrumental(song):
+				addtoList(song)
 			
-		else if keyword is 'liveness':
-			checkLiveness(song)
+		elif keyword is 'liveness':
+			if checkLiveness(song):
+				addtoList(song)
 			
-		else if keyword is 'tempo':
-			checkTempo(song)
+		elif keyword is 'tempo':
+			if checkTempo(song):
+				addtoList(song)
 
 	return;
 	
