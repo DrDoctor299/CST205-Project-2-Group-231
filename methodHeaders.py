@@ -256,50 +256,34 @@ def generatePlaylist(keyword):
 	for song in musicList:
 		if keyword is 'dance':
 			if checkDance(song):
-				addtoList(song)
+				addToList(song)
 		elif keyword is 'energy':
 			if checkEnergy(song):
-				addtoList(song)
+				addToList(song)
 		elif keyword is 'loudness':
 			if checkLoudness(song):
-				addtoList(song)
+				addToList(song)
 			
 		elif keyword is 'speech':
 			if checkSpeech(song):
-				addtoList(song)
+				addToList(song)
 		
 		elif keyword is 'acoustic':
 			if checkAcoustic(song):
-				addtoList(song)
+				addToList(song)
 		
 		elif keyword is 'instrumental':
 			if checkInstrumental(song):
-				addtoList(song)
+				addToList(song)
 			
 		elif keyword is 'liveness':
 			if checkLiveness(song):
-				addtoList(song)
+				addToList(song)
 			
 		elif keyword is 'tempo':
 			if checkTempo(song):
-				addtoList(song)
+				addToList(song)
 
 	return;
 	
 #-------------------------------------------------------------------------------------
-
-
-	
-#-------------------------------------------------------------------------------------
-#Purpose: Use OS to prompt for path to music folder
-#Saves selected path in variable "path" as a string
-#Also Returns path
-
-#Display category buttons/Take button inputs
-#Linked to 
-
-#Create reference array to table only using songs that pass criteria (one for each criteria spotify judges)
-
-#generate output UI
-
-#Export playlist to spotify
