@@ -90,7 +90,7 @@ def getMp3s(path):
 		
 	#If the OS cannot find the directory, print a message saying so (and return True)
 	except:
-		print "Directory not found (Be sure to include the '/' character in your path)"
+		print "Directory not found"
 		return True;
 		
 	
