@@ -2,6 +2,7 @@
 #Playlist Generator
 #Joshua Williams, Fernando Madrigal, Austin Gray
 #CST 205 - Section 2
+#3/16/2017
 #
 #The user sets a file path to their existing library of songs
 #The application will generate a playlist based on 
