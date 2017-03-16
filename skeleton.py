@@ -6,8 +6,8 @@ import SongClass
 path = ""
 methodHeaders.initList();
 
-methodHeaders.getMp3s(PathFromUIElement);
-for SongObjects in musicList:
+methodHeaders.getMp3s('/proj2-205/Music');
+for SongObjects in methodHeaders.musicList:
 	methodHeaders.getID3(path, SongObjects);
-for SongObjects in musicList:
+for SongObjects in methodHeaders.musicList:
 	methodHeaders.getAudioFeatures(SongObjects, methodHeaders.getSpotifyID(SongObjects.getMetadata()))

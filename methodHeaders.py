@@ -1,5 +1,5 @@
 #Imports Song Class for use in methods below
-import SongClass.py
+import SongClass
 #Importing libraries used in various functions
 import os
 import mutagen
@@ -19,8 +19,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 #and the list named "selectedMusicList", which will contain only the Song objects selected as having a desired audio feature
 #retuns nothing
 def initList():
-	global musicList = []
-	global selectedMusicList = []
+	musicList = []
+	selectedMusicList = []
 	return;
 
 #Load Music from folder
@@ -67,9 +67,9 @@ def getID3(path, SongObject):
 	for tags in ID3List:
 		if re.match(artist, tags, flags=0):
 			SongObject.artist = tags.split('=')[1]
-		else if re.match(album, tags, flags=0):
+		elif re.match(album, tags, flags=0):
 			SongObject.album = tags.split('=')[1]
-		else if re.match(track, tags, flags=0):
+		elif re.match(track, tags, flags=0):
 			SongObject.track = tags.split('=')[1]
 	return;
 
