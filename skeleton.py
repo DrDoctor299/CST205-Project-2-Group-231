@@ -12,4 +12,4 @@ getMp3s(PathFromUIElement);
 for SongObjects in musicList:
 	getID3(path, SongObjects);
 for SongObjects in musicList:
-	getAudioFeatures(getSpotifyID(SongObjects.getMetadata()))
+	getAudioFeatures(SongObjects, getSpotifyID(SongObjects.getMetadata()))

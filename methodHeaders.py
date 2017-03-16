@@ -18,10 +18,10 @@ from spotipy.oauth2 import SpotifyClientCredentials
 #Purpose: Initialize the list named "musicList" which will contain the Song objects, 
 #and the list named "selectedMusicList", which will contain only the Song objects selected as having a desired audio feature
 #retuns nothing
-#def initList():
-#	musicList = []
-#	selectedMusicList = []
-#	return;
+def initList():
+	global musicList = []
+	global selectedMusicList = []
+	return;
 
 #Load Music from folder
 #Purpose: takes in a path to a folder, finds the names of all mp3 files within that folder
@@ -38,8 +38,12 @@ def getMp3s(path):
 #Add songs to "musicList"
 #Purpose: takes in a Song object and musicList, and appends the Song to the list
 #Returns nothing
-def addToList(musicList, songObject):
+def addToList(songObject):
 	musicList.append(songObject)
+	return;
+	
+def addToSelected(songObject):
+	selectedMusicList.append(songObject)
 	return;
 	
 #Extract Metadata from file
