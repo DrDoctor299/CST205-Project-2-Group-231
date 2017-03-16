@@ -1,34 +1,6 @@
 #Imports Song Class for use in methods below
-#import SongClass
-class Song(object):
+from SongClass import Song
 
-	def __init__(self, fileName):
-		self.fileName = fileName
-		self.artist = ""
-		self.album = ""
-		self.track = ""
-	
-	def addArtist(self, artist):
-		self.artist = artist
-		
-	def addAlbum(self, album):
-		self.album = album
-		
-	def addTrack(self, track):
-		self.track = track
-	
-	def addFeatures(self, dance, energy, loudness, speech, acoustic, instrumental, liveness, tempo):
-		self.dance = dance
-		self.energy = energy
-		self.loudness = loudness
-		self.speech = speech
-		self.acoustic = acoustic
-		self.instrumental = instrumental
-		self.liveness = liveness
-		self.tempo = tempo
-		
-	def getMetadata(self):
-		return self.artist, self.album, self.track;
 
 #Importing libraries used in various functions
 import os
@@ -46,15 +18,16 @@ from spotipy.oauth2 import SpotifyClientCredentials
 	#Search: https://developer.spotify.com/web-api/search-item/
 	#Client Credentials: https://developer.spotify.com/web-api/authorization-guide/#client-credentials-flow
 
-
+#Initialize data structures
 musicList = []
 selectedMusicList = []
-#Create two lists (CURRENTLY UNUSED)
-#Purpose: Initialize the list named "musicList" which will contain the Song objects, 
-#and the list named "selectedMusicList", which will contain only the Song objects selected as having a desired audio feature
-#retuns nothing
-def initList():
-	
+
+def runBackend(path):
+	getMp3s(path);
+	for SongObjects in musicList:
+		getID3(path, SongObjects);
+	for SongObjects in musicList:
+		getAudioFeatures(SongObjects, getSpotifyID(SongObjects.artist, SongObjects.album, SongObjects.track))
 	return;
 
 #Load Music from folder
