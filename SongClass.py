@@ -8,6 +8,15 @@ class Song(object):
 		self.artist = ""
 		self.album = ""
 		self.track = ""
+		self.dance = ""
+		self.energy = ""
+		self.loudness = ""
+		self.speech = ""
+		self.acoustic = ""
+		self.instrumental = ""
+		self.liveness = ""
+		self.tempo = ""
+		
 	
 	def addArtist(self, artist):
 		self.artist = artist

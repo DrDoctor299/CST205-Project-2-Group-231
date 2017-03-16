@@ -21,26 +21,61 @@ from spotipy.oauth2 import SpotifyClientCredentials
 #Initialize data structures
 musicList = []
 selectedMusicList = []
+badTagsCount = 0
+failFindCount = 0
 
+#Purpose: Takes in a path in string form
+#Runs all neccessary methods to set up song objects and retrieve neccessary information
+#Prints messages to alert user if any songs had no information in their tags, or could not be found on spotify (and how many)
+#Returns nothing if success, return -1 if directory could not be found/no mp3s found
 def runBackend(path):
-	getMp3s(path);
+	#Clears previous loads into musicList
+	global musicList
+	musicList = []
+	#Searches directory in path, returns to skeleton (with -1) if directory is invalid, otherwise continues
+	if getMp3s(path):
+		return -1;
+	#Iterates over all song objects to find metadata in ID3 tags
 	for SongObjects in musicList:
 		getID3(path, SongObjects);
+	#Iterates over all song objects to find audio features
 	for SongObjects in musicList:
 		getAudioFeatures(SongObjects, getSpotifyID(SongObjects.artist, SongObjects.album, SongObjects.track))
+	#if there were songs not found or that had not tags, prints messages saying so
+	if badTagsCount > 0:
+		print str(badTagsCount) + " out of " + str(len(musicList)) + " songs did not have tags."
+	if failFindCount > 0:
+		print str(failFindCount) + " out of " + str(len(musicList)) + " songs could not be located in the Spotify Database"
 	return;
 
 #Load Music from folder
 #Purpose: takes in a path to a folder, finds the names of all mp3 files within that folder
 #Creates music objects as Song(fileName) for each, calls the addToList() function to add those objects to "musicList"
-#Returns nothing
+#Returns True if there is an error, returns False if there were no problems
 def getMp3s(path):
-	for fileName in os.listdir(path):
-	    if fileName.endswith(".mp3"):
-			tempSong = Song(fileName)
-			addToList(tempSong)
-			del tempSong
-	return;
+	noMP3Count = 0
+	
+	try:
+		#Iterate through all files in folder, if they end with '.mp3' add them to 'musicList'
+		for fileName in os.listdir(path):
+			if fileName.endswith(".mp3"):
+				tempSong = Song(fileName)
+				addToList(tempSong)
+				del tempSong
+			else:
+				noMP3Count = noMP3Count + 1	
+		
+		#If the number of non mp3 files is equal to the number of files, print a message saying that there were no MP3s (and return True)
+		if noMP3Count == len(os.listdir(path)):
+			print "No MP3 files found in directory"
+			return True;
+		return False;
+		
+	#If the OS cannot find the directory, print a message saying so (and return True)
+	except:
+		print "Directory not found (Be sure to include the '/' character in your path)"
+		return True;
+		
 	
 #Add songs to "musicList"
 #Purpose: takes in a Song object and musicList, and appends the Song to the list
@@ -59,31 +94,47 @@ def addToSelected(songObject):
 #Use SongObjectName.addMetadata(artist, album, track) to add to "musicList"
 #returns nothing.
 def getID3(path, SongObject):
-	
-	#Accesses current Song
-	audio = MP3(path + SongObject.fileName, ID3=EasyID3)
-	#Accesses tags for said Song, then splits all tags up into a list
-	ID3 = audio.pprint()
-	ID3List = ID3.splitlines()
-	
-	#Compares all tags for the song against the previously created artist, album and track regular expression objects. On success, these are added to the appropriate Song object's attribute
-	for tags in ID3List:
-		if re.match("artist=.*", tags, flags=0):
-			artistRough = tags.split('=')
-			SongObject.artist = artistRough[1]
-		elif re.match("album=.*", tags, flags=0):
-			albumRough = tags.split('=')
-			SongObject.album = albumRough[1]
-		elif re.match("title=.*", tags, flags=0):
-			trackRough = tags.split('=')
-			SongObject.track = trackRough[1]
-	return;
+	#Loop is used with try/except block to catch and fix an input error (missing an ending '/' on inputed path)
+	for num in range(2):
+		try:
+			#Accesses current Song
+			audio = MP3(path + SongObject.fileName, ID3=EasyID3)
+			#Accesses tags for said Song, then splits all tags up into a list
+			ID3 = audio.pprint()
+			ID3List = ID3.splitlines()
+			
+			#Compares all tags for the song against the previously created artist, album and track regular expression objects. On success, these are added to the appropriate Song object's attribute
+			for tags in ID3List:
+				count = 0
+				global badTagsCount
+				if re.match("artist=.*", tags, flags=0):
+					artistRough = tags.split('=')
+					SongObject.artist = artistRough[1]
+				elif re.match("album=.*", tags, flags=0):
+					albumRough = tags.split('=')
+					SongObject.album = albumRough[1]
+				elif re.match("title=.*", tags, flags=0):
+					trackRough = tags.split('=')
+					SongObject.track = trackRough[1]
+				else:
+					count = count + 1
+					if count == len(ID3List):
+						badTagsCount = badTagsCount + 1
+			return;
+			
+		#Corrects input error (missing ending '/')
+		except:
+			path = path + '/'
+			continue
+		
 
 #Use metadata to find spotify id
 #Purpose: Take in artist name, album name and track 
 #Look up track id using search (use all three arguments as keyword inputs)
 #return spotify trackID
 def getSpotifyID(artist, album, track):
+	
+	global failFindCount
 	
 	#Store three individual search terms in a variable (each seperated by a space)
 	searchTerm = artist + " " + track
@@ -106,7 +157,7 @@ def getSpotifyID(artist, album, track):
 		spotifyID = uriList[2]
 		return spotifyID;
 	except IndexError:
-		print "Could not find song on Spotify"
+		failFindCount = failFindCount + 1
 		return -1;
 	
 	
@@ -152,11 +203,9 @@ def getAudioFeatures(SongObject, spotifyID):
 
 #Permutations for each catagory:
 #dance
-def checkDance(index):
-	if(musicList[index].dance > .75):
-		
-		#index is greater than volume
-		#check is set to true
+def checkDance(song):
+	#Return true if value of dance is higher than constant
+	if(song.dance > .75):
 		check = True;
 	else:
 		check = False;
@@ -164,11 +213,9 @@ def checkDance(index):
 	return check;
 
 #energy
-def checkEnergy(index):
-	if(musicList[index].energy > .75):
-		
-		#index is greater than volume
-		#check is set to true
+def checkEnergy(song):
+	#Return true if value of energy is higher than constant
+	if(song.energy > .75):
 		check = True;
 	else:
 		check = False;
@@ -176,11 +223,9 @@ def checkEnergy(index):
 	return check;
 	
 #loudness
-def checkLoudness(index):
-	if(musicList[index].loudness > 30):
-		
-		#index is greater than volume
-		#check is set to true
+def checkLoudness(song):
+	#Return true if value of loudness is higher than constant
+	if(song.loudness > -3 ):
 		check = True;
 	else:
 		check = False;
@@ -188,11 +233,9 @@ def checkLoudness(index):
 	return check;
 
 #speech
-def checkSpeech(index):
-	if(musicList[index].speech > .33 and musicList[index].speech < .66):
-		
-		#index is greater than volume
-		#check is set to true
+def checkSpeech(song):
+	#Return true if value of speech is higher than constant
+	if(song.speech > .33 and song.speech < .66):
 		check = True;
 	else:
 		check = False;
@@ -200,11 +243,9 @@ def checkSpeech(index):
 	return check;
 
 #acoustic
-def checkAcoustic(index):
-	if(musicList[index].acoustic > .75):
-		
-		#index is greater than volume
-		#check is set to true
+def checkAcoustic(song):
+	#Return true if value of acoustic is higher than constant
+	if(song.acoustic > .75):
 		check = True;
 	else:
 		check = False;
@@ -212,11 +253,10 @@ def checkAcoustic(index):
 	return check;
 	
 #instrumental
-def checkInstrumental(index):
-	if(musicList[index].instrumental > .5):
-		
-		#index is greater than volume
-		#check is set to true
+def checkInstrumental(song):
+	#Return true if value of instrumental is higher than constant
+	#.5 indicates likely instrumental, closer to 1.0 means higher confidence
+	if(song.instrumental > .6):
 		check = True;
 	else:
 		check = False;
@@ -224,11 +264,10 @@ def checkInstrumental(index):
 	return check;
 	
 #liveness
-def checkLiveness(index):
-	if(musicList[index].liveness > .8):
-		
-		#index is greater than volume
-		#check is set to true
+def checkLiveness(song):
+	#Return true if value of liveness is higher than constant
+	#API: "A value above 0.8 provides strong likelihood that the track is live."
+	if(song.liveness > .8):
 		check = True;
 	else:
 		check = False;
@@ -236,8 +275,8 @@ def checkLiveness(index):
 	return check;
 	
 #tempo
-def checkTempo(index):
-	if(musicList[index].tempo > 120):
+def checkTempo(song):
+	if(song.tempo > 100):
 		
 		#index is greater than volume
 		#check is set to true
@@ -253,37 +292,86 @@ def checkTempo(index):
 #For each check that returns true, add that Song object to a new list "selectedMusicList"
 #return nothing
 def generatePlaylist(keyword):
+	
+	#Clears selectedMusicList of any residual values
+	global selectedMusicList
+	selectedMusicList = []
+	
 	for song in musicList:
-		if keyword is 'dance':
+		if keyword == 'dance':
 			if checkDance(song):
-				addToList(song)
-		elif keyword is 'energy':
+				addToSelected(song)
+				
+		elif keyword == 'energy':
 			if checkEnergy(song):
-				addToList(song)
-		elif keyword is 'loudness':
+				addToSelected(song)
+				
+		elif keyword == 'loudness':
 			if checkLoudness(song):
-				addToList(song)
+				addToSelected(song)
 			
-		elif keyword is 'speech':
+		elif keyword == 'speech':
 			if checkSpeech(song):
-				addToList(song)
+				addToSelected(song)
 		
-		elif keyword is 'acoustic':
+		elif keyword == 'acoustic':
 			if checkAcoustic(song):
-				addToList(song)
+				addToSelected(song)
 		
-		elif keyword is 'instrumental':
+		elif keyword == 'instrumental':
 			if checkInstrumental(song):
-				addToList(song)
+				addToSelected(song)
 			
-		elif keyword is 'liveness':
+		elif keyword == 'liveness':
 			if checkLiveness(song):
-				addToList(song)
+				addToSelected(song)
 			
-		elif keyword is 'tempo':
+		elif keyword == 'tempo':
 			if checkTempo(song):
-				addToList(song)
+				addToSelected(song)
+				
+		else:
+			print "Not a valid keyword"
+			return;
 
 	return;
 	
-#-------------------------------------------------------------------------------------
+#Purpose: Takes in a string "keyword", and checks to make sure it is valid
+#Returns false if valid, and true if not
+def checkKeyword(keyword):
+	if keyword == 'dance':
+		return False;
+		
+	elif keyword == 'energy':
+		return False;
+		
+	elif keyword == 'loudness':
+		return False;
+		
+	elif keyword == 'speech':
+		return False;
+	
+	elif keyword == 'acoustic':
+		return False;
+	
+	elif keyword == 'instrumental':
+		return False;
+		
+	elif keyword == 'liveness':
+		return False;
+		
+	elif keyword == 'tempo':
+		return False;
+		
+	else:
+		print "Not a valid keyword"
+		return True;
+	
+#Prints out the selected playlist on the command line	
+#Purpose: Prints out the track name and artist of all songs in selectedMusicList
+def printPlaylist():
+	
+    for song in selectedMusicList:
+        print(song.track + " by " + song.artist)
+    print "-----------------------------------------------------------------------"
+    return;
