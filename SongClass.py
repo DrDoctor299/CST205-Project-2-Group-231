@@ -1,3 +1,19 @@
+#---------------------------------------------------------------------------------------------------------------------------------------------------
+#Playlist Generator
+#Joshua Williams, Fernando Madrigal, Austin Gray
+#CST 205 - Section 2
+#
+#The user sets a file path to their existing library of songs
+#The application will generate a playlist based on 
+#song characteristics the user chooses
+#
+#Joshua wrote the template for our functions, worked on parsing ID3 tags, accessing the Spotify servers and implementing error checking
+#Fernando filled in methods and helped with researching
+#Austin filled in methods, researched, and created the GUI for the program to run with (Which we then replaced with a command line interface, for seperate reasons)
+#
+#Github Link:
+#https://github.com/DrDoctor299/CST205-Project-2-Group-231
+#---------------------------------------------------------------------------------------------------------------------------------------------------
 #Song Object
 #Purpose: Define an object which will hold all of the necessary data for each music file
 
