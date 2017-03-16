@@ -6,7 +6,7 @@ Joshua Williams
 Austin Gray
 Fernando Madrigal
 
-Class:
+Course:
 CST 205 Section 02
 
 Date:
