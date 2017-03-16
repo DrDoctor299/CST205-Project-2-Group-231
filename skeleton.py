@@ -1,15 +1,13 @@
 #File used to call all methods
 
-import methodHeaders.py
-import SongClass.py
+import methodHeaders
+import SongClass
 
 path = ""
-musicList = []
-selectedMusicList = []
+methodHeaders.initList();
 
-
-getMp3s(PathFromUIElement);
+methodHeaders.getMp3s(PathFromUIElement);
 for SongObjects in musicList:
-	getID3(path, SongObjects);
+	methodHeaders.getID3(path, SongObjects);
 for SongObjects in musicList:
-	getAudioFeatures(SongObjects, getSpotifyID(SongObjects.getMetadata()))
+	methodHeaders.getAudioFeatures(SongObjects, methodHeaders.getSpotifyID(SongObjects.getMetadata()))
