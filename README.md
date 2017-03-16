@@ -13,10 +13,18 @@ Date:
 March 16, 2017
 
 How to run program:
-Run the skeleton.py file from the command prompt.
-The user gets prompted to set a file path of their song library (from root).
-The user chooses their desired characteristic in a playlist off of a provided list, and then types it in.
-The program generates a list of songs that displays a playlist of their desired type.
+Setup: install the mutagen and spotipy libraries 
+Mutagen: (https://mutagen.readthedocs.io/en/latest/)
+    sudo pip install mutagen
+Spotipy: (https://spotipy.readthedocs.io/en/latest/)
+    sudo pip install spotipy
+Directory: have a directory with MP3 Files (and know the path from pwd of that directory)
+
+Run:
+    Run the skeleton.py file from the command prompt.
+    Set file path to desired directory containing MP3 files.
+    The user chooses their desired characteristic in a playlist off of a provided list, and then types it in.
+    The program generates a list of songs that displays a playlist of their desired type.
 
 
 Link to GitHub repository:
