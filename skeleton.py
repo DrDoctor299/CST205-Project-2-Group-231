@@ -1,14 +1,8 @@
-#Import necessary methods from methodHeaders.py
-from methodHeaders import runBackend
-from methodHeaders import generatePlaylist
-from methodHeaders import printPlaylist
-from methodHeaders import musicList
-from methodHeaders import checkKeyword
-
 #---------------------------------------------------------------------------------------------------------------------------------------------------
 #Playlist Generator
 #Joshua Williams, Fernando Madrigal, Austin Gray
 #CST 205 - Section 2
+#3/16/2017
 #
 #The user sets a file path to their existing library of songs
 #The application will generate a playlist based on 
@@ -22,9 +16,17 @@ from methodHeaders import checkKeyword
 #https://github.com/DrDoctor299/CST205-Project-2-Group-231
 #---------------------------------------------------------------------------------------------------------------------------------------------------
 
+#Import necessary methods from methodHeaders.py
+from methodHeaders import runBackend
+from methodHeaders import generatePlaylist
+from methodHeaders import printPlaylist
+from methodHeaders import musicList
+from methodHeaders import checkKeyword
 
+#While loop used for error checking, and a menu
 while True:
        print "-----------------------------------------------------------------------"
+       #Takes in a string input from the command line (used to find path to directory)
        path = raw_input("Please enter your song library file path (Must end with '/' character): ")
        print "Getting song information..."
        dirCheck = runBackend(str(path))
